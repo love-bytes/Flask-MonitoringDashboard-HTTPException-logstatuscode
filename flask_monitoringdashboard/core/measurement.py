@@ -110,7 +110,17 @@ def evaluate(route_handler, args, kwargs):
         return result, status_code, None
 
     except Exception as e:
-        return None, 500, e
+        # https://github.com/flask-dashboard/Flask-MonitoringDashboard/blob/76b1d701142801b6b428a3fad8dda25f1f188dbf/flask_monitoringdashboard/core/measurement.py#L114
+        # This solution seems impractical when constructing response object with flask.make_response -need to set code attr manually?- but idk 
+
+        # References
+        # https://github.com/pallets/werkzeug/blob/b1911cd0a054f92fa83302cdb520d19449c0b87b/src/werkzeug/exceptions.py#L73
+        # https://github.com/flask-dashboard/Flask-MonitoringDashboard/pull/402#issuecomment-889906420
+        try:
+            status_code = e.response.status_code or e.code
+        except AttributeError:
+            status_code = 500
+        return None, status_code, e
 
 
 def add_wrapper1(endpoint, fun):
